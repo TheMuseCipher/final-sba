@@ -71,7 +71,7 @@ func showStyledDialog(parent fyne.Window, title string, content fyne.CanvasObjec
 	dialogWindow.Show()
 }
 
-// styleFormContent wraps form fields with minimal padding
+// Wraps form fields with minimal padding
 func styleFormContent(content fyne.CanvasObject) fyne.CanvasObject {
 	// Minimal padding - content is already a VBox from the caller
 	return container.NewPadded(content)
