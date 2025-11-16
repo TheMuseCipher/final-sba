@@ -332,7 +332,8 @@ This section explains how the different parts of the program tie into each other
 
 ### Overall System Architecture
 
-[system.png]
+<img width="778" height="857" alt="image" src="https://github.com/user-attachments/assets/6f9e50b4-b893-47a5-b9d4-f0ec837ae9b7" />
+
 
 ### File Dependencies and Call Flow
 
@@ -396,6 +397,10 @@ All GUI files use the business logic packages to perform operations and the data
 This section covers the implementation of the three core features: user authentication, inventory management, and transaction processing. Each includes a flowchart, program code with explanation, and description of program output.
 
 ### User Authentication
+
+#### Flowchart
+
+<img width="503" height="740" alt="image" src="https://github.com/user-attachments/assets/92814e98-53ac-42cb-a157-511dcf391813" />
 
 #### Program Code + Explanation
 
@@ -565,7 +570,7 @@ One of the following will happen.
 
 #### Flowchart
 
-[ims.png]
+<img width="703" height="741" alt="image" src="https://github.com/user-attachments/assets/e7fd64be-8435-4cfc-9f80-c071269c3b74" />
 
 #### Program Code + Explanation
 
@@ -780,7 +785,7 @@ func RestockItem(db Database, itemID int, quantity int, expiryDate *time.Time) e
 
 #### Flowchart
 
-[transactions.png]
+<img width="630" height="798" alt="image" src="https://github.com/user-attachments/assets/acc6d38c-bba3-4598-8832-6974d4595c1e" />
 
 #### Program Code + Explanation
 
