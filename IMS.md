@@ -397,6 +397,221 @@ This section covers the implementation of the three core features: user authenti
 
 ### User Authentication
 
+#### Flowchart
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        START APPLICATION                         │
+│                    (main.go calls ShowLoginWindow)               │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    ShowLoginWindow(appState)                     │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ 1. Create Fyne application instance                      │  │
+│  │ 2. Create login window (400x300)                         │  │
+│  │ 3. Create username entry field                           │  │
+│  │ 4. Create password entry field (masked)                  │  │
+│  │ 5. Create status label (for error messages)              │  │
+│  │ 6. Create login button with click handler                │  │
+│  └──────────────────────────────────────────────────────────┘  │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    DISPLAY LOGIN WINDOW                          │
+│              (User sees username and password fields)            │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             ▼
+                    ┌────────────────┐
+                    │ User enters    │
+                    │ credentials    │
+                    └────────┬───────┘
+                             │
+                             ▼
+                    ┌────────────────┐
+                    │ User clicks    │
+                    │ "Login" button │
+                    └────────┬───────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              Login Button Click Handler                          │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ username = usernameEntry.Text                            │  │
+│  │ password = passwordEntry.Text                            │  │
+│  └──────────────────────────────────────────────────────────┘  │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │ Are username    │
+                    │ AND password    │
+                    │ both filled?    │
+                    └────┬────────┬───┘
+                         │ NO     │ YES
+                         │        │
+                         ▼        │
+            ┌────────────────────┐│
+            │ Display error:     ││
+            │ "Please enter      ││
+            │ both username      ││
+            │ and password"      ││
+            └────────────────────┘│
+                         │        │
+                         └────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│         appState.Authenticate(username, password)                │
+│                    (auth/auth.go)                                │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    QUERY DATABASE                                │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ SELECT id, username, password_hash,                      │  │
+│  │        is_root_admin, can_read,                          │  │
+│  │        can_transaction, can_revenue,                     │  │
+│  │        created_at                                        │  │
+│  │ FROM users WHERE username = ?                            │  │
+│  └──────────────────────────────────────────────────────────┘  │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                ┌────────────┴────────────┐
+                │                         │
+                ▼                         ▼
+    ┌──────────────────────┐   ┌──────────────────────┐
+    │ User found in DB?    │   │ Database error?      │
+    │ (err == sql.ErrNoRows)│   │ (other error)        │
+    └────┬──────────────┬──┘   └────┬──────────────┬──┘
+         │ NO           │ YES        │ YES          │ NO
+         │              │            │              │
+         ▼              │            ▼              │
+┌───────────────┐       │   ┌───────────────┐      │
+│ Return error: │       │   │ Return error  │      │
+│ "invalid      │       │   │ (database)    │      │
+│ credentials"  │       │   └───────┬───────┘      │
+└───────┬───────┘       │           │              │
+        │               │           └──────────────┘
+        └───────────────┴───────────────┘
+                        │
+                        ▼
+        ┌───────────────────────────────┐
+        │ Password hash retrieved from  │
+        │ database: passwordHash        │
+        └───────────────┬───────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────────┐
+│         CheckPasswordHash(password, passwordHash)                │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ Uses bcrypt.CompareHashAndPassword()                     │  │
+│  │ to verify entered password matches stored hash           │  │
+│  └──────────────────────────────────────────────────────────┘  │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                ┌────────────┴────────────┐
+                │                         │
+                ▼                         ▼
+    ┌──────────────────────┐   ┌──────────────────────┐
+    │ Password matches?    │   │ Password doesn't     │
+    │ (err == nil)         │   │ match                │
+    └────┬──────────────┬──┘   └────┬──────────────┬──┘
+         │ YES          │ NO         │              │
+         │              │            │              │
+         ▼              │            ▼              │
+┌───────────────┐       │   ┌───────────────┐      │
+│ Create User   │       │   │ Return error: │      │
+│ struct with   │       │   │ "invalid      │      │
+│ permissions:  │       │   │ credentials"  │      │
+│ - ID          │       │   └───────┬───────┘      │
+│ - Username    │       │           │              │
+│ - IsRootAdmin │       │           └──────────────┘
+│ - CanRead     │       │
+│ - CanTransaction│     │
+│ - CanRevenue  │       │
+│ - CreatedAt   │       │
+└───────┬───────┘       │
+        │               │
+        ▼               │
+┌───────────────────────┐│
+│ Store user in         ││
+│ AppState:             ││
+│ a.user = user         ││
+└───────┬───────────────┘│
+        │                │
+        └────────────────┘
+                │
+                ▼
+    ┌───────────────────────┐
+    │ Return user and nil   │
+    │ (no error)            │
+    └───────────┬───────────┘
+                │
+                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              Back to Login Button Handler                        │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ Check if err != nil                                      │  │
+│  └──────────────────────────────────────────────────────────┘  │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                ┌────────────┴────────────┐
+                │                         │
+                ▼                         ▼
+    ┌──────────────────────┐   ┌──────────────────────┐
+    │ Error occurred?      │   │ Authentication       │
+    │ (err != nil)         │   │ successful?          │
+    │                      │   │ (err == nil)         │
+    └────┬──────────────┬──┘   └────┬──────────────┬──┘
+         │ YES          │ NO         │ YES          │
+         │              │            │              │
+         ▼              │            ▼              │
+┌───────────────┐       │   ┌──────────────────────┐│
+│ Display error:│       │   │ Hide login window    ││
+│ "Invalid      │       │   │                      ││
+│ credentials"  │       │   │ ShowMainWindow(      ││
+│ in statusLabel│       │   │   myApp,             ││
+└───────┬───────┘       │   │   appState,          ││
+        │               │   │   user               ││
+        │               │   │ )                    ││
+        │               │   └───────┬──────────────┘│
+        │               │           │               │
+        └───────────────┴───────────┘               │
+                    │                                │
+                    ▼                                ▼
+        ┌───────────────────────┐      ┌───────────────────────┐
+        │ User can try again    │      │ Main window opens     │
+        │ (stays on login       │      │ with tabs based on    │
+        │  window)              │      │ user permissions      │
+        └───────────────────────┘      └───────────────────────┘
+```
+
+**Flowchart Explanation:**
+
+The login system follows this flow:
+
+1. **Application Start**: `main.go` calls `ShowLoginWindow()` which creates the login interface
+2. **Window Creation**: Login window is created with username field, password field (masked), and login button
+3. **User Input**: User enters credentials and clicks login button
+4. **Validation**: System checks if both fields are filled
+5. **Database Query**: `Authenticate()` function queries database for user by username
+6. **User Lookup**: If user not found, returns "invalid credentials" (prevents username enumeration)
+7. **Password Verification**: Uses bcrypt to compare entered password with stored hash
+8. **User Creation**: If password matches, creates User struct with all permissions from database
+9. **Session Storage**: Stores authenticated user in AppState for session management
+10. **Success/Error**: Either shows main window (success) or displays error message (failure)
+
+**Key Security Features:**
+- Passwords are never stored in plain text (bcrypt hashing)
+- Same error message for invalid username or password (prevents username enumeration)
+- User session stored in AppState after successful authentication
+- All database errors are properly handled and returned
+
 #### Program Code + Explanation
 
 **auth/auth.go - HashPassword Function**
