@@ -947,7 +947,9 @@ func DecodeBarcodeFromImage(filePath string) (string, error) {
 
 ### GUI Implementation
 
-The GUI is built using the Fyne framework, which provides cross-platform support for Linux and Windows. The interface uses a tab-based design where different tabs are shown based on user permissions.
+The GUI is built using the Fyne framework, which provides cross-platform support for Linux and Windows. The interface uses a tab-based design where different tabs are shown based on user permissions. Program code is the same as the code used in other parts. Below is a flowchart of how it works.
+
+<img width="778" height="659" alt="image" src="https://github.com/user-attachments/assets/139e513d-2835-4872-a2f0-e6fe23e2dadf" />
 
 **Key GUI Features:**
 
