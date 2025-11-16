@@ -332,7 +332,8 @@ This section explains how the different parts of the program tie into each other
 
 ### Overall System Architecture
 
-[system.png]
+<img width="778" height="857" alt="image" src="https://github.com/user-attachments/assets/6f9e50b4-b893-47a5-b9d4-f0ec837ae9b7" />
+
 
 ### File Dependencies and Call Flow
 
@@ -396,29 +397,6 @@ All GUI files use the business logic packages to perform operations and the data
 This section covers the implementation of the three core features: user authentication, inventory management, and transaction processing. Each includes a flowchart, program code with explanation, and description of program output.
 
 ### User Authentication
-
-#### Flowchart
-
-**Flowchart Explanation:**
-
-The login system follows this flow:
-
-1. **Application Start**: `main.go` calls `ShowLoginWindow()` which creates the login interface
-2. **Window Creation**: Login window is created with username field, password field (masked), and login button
-3. **User Input**: User enters credentials and clicks login button
-4. **Validation**: System checks if both fields are filled
-5. **Database Query**: `Authenticate()` function queries database for user by username
-6. **User Lookup**: If user not found, returns "invalid credentials" (prevents username enumeration)
-7. **Password Verification**: Uses bcrypt to compare entered password with stored hash
-8. **User Creation**: If password matches, creates User struct with all permissions from database
-9. **Session Storage**: Stores authenticated user in AppState for session management
-10. **Success/Error**: Either shows main window (success) or displays error message (failure)
-
-**Key Security Features:**
-- Passwords are never stored in plain text (bcrypt hashing)
-- Same error message for invalid username or password (prevents username enumeration)
-- User session stored in AppState after successful authentication
-- All database errors are properly handled and returned
 
 #### Program Code + Explanation
 
@@ -588,7 +566,7 @@ One of the following will happen.
 
 #### Flowchart
 
-[ims.png]
+<img width="703" height="741" alt="image" src="https://github.com/user-attachments/assets/e7fd64be-8435-4cfc-9f80-c071269c3b74" />
 
 #### Program Code + Explanation
 
@@ -803,7 +781,7 @@ func RestockItem(db Database, itemID int, quantity int, expiryDate *time.Time) e
 
 #### Flowchart
 
-[transactions.png]
+<img width="630" height="798" alt="image" src="https://github.com/user-attachments/assets/acc6d38c-bba3-4598-8832-6974d4595c1e" />
 
 #### Program Code + Explanation
 
