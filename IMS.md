@@ -398,6 +398,10 @@ This section covers the implementation of the three core features: user authenti
 
 ### User Authentication
 
+#### Flowchart
+
+<img width="503" height="740" alt="login" src="https://github.com/user-attachments/assets/0390b035-f3c0-415c-80d3-7a6b4d059f02" />
+
 #### Program Code + Explanation
 
 **auth/auth.go - HashPassword Function**
