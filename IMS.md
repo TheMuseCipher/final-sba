@@ -1048,7 +1048,9 @@ The GUI is built using the Fyne framework, which provides cross-platform support
 func CreateItem(name string, price float64) (*Item, error) {
     // Compiler catches if wrong types passed
 }
+```
 
+```python
 // Python - runtime type checking
 def create_item(name, price):
     # No type checking until runtime
@@ -1098,7 +1100,6 @@ if not ok
 ```
 
 ```go
-```
 // Fyne
 value, err := fyneWidget.GetValue()
 if err != nil {
