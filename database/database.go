@@ -2,6 +2,8 @@ package database
 
 import (
 	"database/sql"
+	"log"
+	"time"
 
 	_ "modernc.org/sqlite"
 
@@ -13,21 +15,35 @@ type Database struct {
 }
 
 func NewDatabase() (*Database, error) {
+	log.Println("Opening SQLite database...")
+	startTime := time.Now()
 	db, err := sql.Open("sqlite", "ims.db")
 	if err != nil {
+		log.Printf("Failed to open database: %v\n", err)
 		return nil, err
 	}
+	log.Printf("Database opened in %v\n", time.Since(startTime))
 
 	d := &Database{db: db}
+
+	log.Println("Initializing database schema...")
+	schemaStart := time.Now()
 	if err := d.initSchema(); err != nil {
+		log.Printf("Failed to initialize schema: %v\n", err)
 		return nil, err
 	}
+	log.Printf("Database schema initialized in %v\n", time.Since(schemaStart))
 
 	// Create root admin if it doesn't exist
+	log.Println("Ensuring root admin exists...")
+	adminStart := time.Now()
 	if err := d.ensureRootAdmin(); err != nil {
+		log.Printf("Failed to ensure root admin: %v\n", err)
 		return nil, err
 	}
+	log.Printf("Root admin check completed in %v\n", time.Since(adminStart))
 
+	log.Println("Database initialization completed successfully")
 	return d, nil
 }
 
