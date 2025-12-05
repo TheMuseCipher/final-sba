@@ -4,7 +4,6 @@ Name: Hussain Sameer
 Class: 6B
 CSNO: 6217
 
----
 
 ## 1. Introduction
 
@@ -29,7 +28,7 @@ CSNO: 6217
    - [Fyne vs QT](#fyne-vs-qt)
    - [SQLite vs Simpler Text File/JSON Database](#sqlite-vs-simpler-text-filejson-database)
 
----
+ 
 
 ### Data Dictionary
 
@@ -138,7 +137,7 @@ Models are essentially `structs` for any SQL package in go, with the benefit of 
 **Database Interface** (used in packages that handle logic)
 - `GetDB() *sql.DB`: Method to access underlying database connection
 
----
+ 
 
 ### Overview of Functions
 
@@ -324,7 +323,7 @@ Models are essentially `structs` for any SQL package in go, with the benefit of 
   - Returns: Scrollable container with revenue interface
   - Called: When main window is created for users with revenue permission
 
----
+ 
 
 ## 2. System Flowchart
 
@@ -390,7 +389,7 @@ This section explains how the different parts of the program tie into each other
 
 All GUI files use the business logic packages to perform operations and the database package (through AppState) to access data.
 
----
+ 
 
 ## 3. Basic Features Implementation
 
@@ -564,7 +563,7 @@ One of the following will happen.
 - Password: "admin"
 - Created automatically when app is first open or if no admin exists
 
----
+ 
 
 ### Inventory Management
 
@@ -779,7 +778,7 @@ func RestockItem(db Database, itemID int, quantity int, expiryDate *time.Time) e
 - Shows current quantity and calculated new total
 - On success: Item quantity gets updated, new batch gets created, and dialog closes
 
----
+ 
 
 ### Transaction Processing
 
@@ -945,7 +944,7 @@ func DecodeBarcodeFromImage(filePath string) (string, error) {
   - Success message displayed
 - Transaction appears in Transaction Log tab
 
----
+ 
 
 ## 4. Other Special Features
 
@@ -1020,7 +1019,7 @@ The GUI is built using the Fyne framework, which provides cross-platform support
 - Item not found (Includes a pop-up to add item which reduces the overhead of creating a new item)
 - Database connection failure: Error shown at startup
 
----
+ 
 
 ## 5. Comparisons to Other Alternatives
 
