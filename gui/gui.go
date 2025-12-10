@@ -76,12 +76,12 @@ func ShowMainWindow(myApp fyne.App, appState *auth.AppState, user *models.User) 
 									// Show input dialog for typing "RESET"
 									confirmEntry := widget.NewEntry()
 									confirmEntry.SetPlaceHolder("Type RESET to confirm")
-									
+
 									confirmContent := container.NewVBox(
 										widget.NewLabel("Type 'RESET' (all caps) to confirm database reset:"),
 										confirmEntry,
 									)
-									
+
 									dialog.ShowCustomConfirm(
 										"Type RESET to Confirm",
 										"Cancel",
@@ -95,10 +95,10 @@ func ShowMainWindow(myApp fyne.App, appState *auth.AppState, user *models.User) 
 													dialog.ShowError(fmt.Errorf("Failed to reset database: %v", err), mainWindow)
 													return
 												}
-												
+
 												// Show success message
 												dialog.ShowInformation("Database Reset", "Database has been reset successfully. You will be logged out.", mainWindow)
-												
+
 												// Log out and return to login
 												appState.SetUser(nil)
 												mainWindow.Close()
@@ -161,6 +161,9 @@ func createInventoryTab(parent fyne.Window, appState *auth.AppState, user *model
 	var currentItems []models.Item
 	var selectedID widget.ListItemID = -1
 
+	// Low stock threshold - items below this show a warning
+	const lowStockThreshold = 10
+
 	// Item list with aligned columns using fixed-width containers
 	list := widget.NewList(
 		func() int {
@@ -171,12 +174,14 @@ func createInventoryTab(parent fyne.Window, appState *auth.AppState, user *model
 			codeLabel := widget.NewLabel("")
 			priceLabel := widget.NewLabel("")
 			qtyLabel := widget.NewLabel("")
+			warningLabel := widget.NewLabel("")
 			// Use fixed-width containers
 			return container.NewHBox(
 				container.NewBorder(nil, nil, nil, nil, nameLabel),
 				container.NewBorder(nil, nil, nil, nil, codeLabel),
 				container.NewBorder(nil, nil, nil, nil, priceLabel),
 				container.NewBorder(nil, nil, nil, nil, qtyLabel),
+				container.NewBorder(nil, nil, nil, nil, warningLabel),
 			)
 		},
 		func(id widget.ListItemID, obj fyne.CanvasObject) {
@@ -195,6 +200,14 @@ func createInventoryTab(parent fyne.Window, appState *auth.AppState, user *model
 				qtyLabel := box.Objects[3].(*fyne.Container).Objects[0].(*widget.Label)
 				qtyLabel.SetText(fmt.Sprintf("%d", item.Quantity))
 				qtyLabel.Resize(fyne.NewSize(100, qtyLabel.MinSize().Height))
+				// Show warning for low stock items
+				warningLabel := box.Objects[4].(*fyne.Container).Objects[0].(*widget.Label)
+				if item.Quantity < lowStockThreshold {
+					warningLabel.SetText("[!] LOW STOCK")
+					warningLabel.TextStyle = fyne.TextStyle{Bold: true}
+				} else {
+					warningLabel.SetText("")
+				}
 			}
 		},
 	)
@@ -278,11 +291,14 @@ func createInventoryTab(parent fyne.Window, appState *auth.AppState, user *model
 	qtyHeader := widget.NewLabel("Quantity")
 	qtyHeader.TextStyle = fyne.TextStyle{Bold: true}
 	qtyHeader.Resize(fyne.NewSize(100, qtyHeader.MinSize().Height))
+	statusHeader := widget.NewLabel("Status")
+	statusHeader.TextStyle = fyne.TextStyle{Bold: true}
 	headerRow := container.NewHBox(
 		container.NewBorder(nil, nil, nil, nil, nameHeader),
 		container.NewBorder(nil, nil, nil, nil, codeHeader),
 		container.NewBorder(nil, nil, nil, nil, priceHeader),
 		container.NewBorder(nil, nil, nil, nil, qtyHeader),
+		container.NewBorder(nil, nil, nil, nil, statusHeader),
 	)
 
 	content := container.NewBorder(

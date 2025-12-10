@@ -178,3 +178,36 @@ func UpdateItemQuantity(db Database, id int, quantity int) error {
 	return err
 }
 
+// GetLowStockItems returns items with quantity below the threshold
+func GetLowStockItems(db Database, threshold int) ([]models.Item, error) {
+	rows, err := db.GetDB().Query(
+		"SELECT id, name, code, description, price, cost, quantity, in_stock_date, expiry_date, created_at, updated_at FROM items WHERE quantity < ? ORDER BY quantity ASC",
+		threshold,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var items []models.Item
+	for rows.Next() {
+		var item models.Item
+		var createdAt, updatedAt, inStockDate time.Time
+		var expiryDate sql.NullTime
+
+		err := rows.Scan(&item.ID, &item.Name, &item.Code, &item.Description, &item.Price, &item.Cost, &item.Quantity, &inStockDate, &expiryDate, &createdAt, &updatedAt)
+		if err != nil {
+			return nil, err
+		}
+
+		item.InStockDate = inStockDate
+		if expiryDate.Valid {
+			item.ExpiryDate = &expiryDate.Time
+		}
+		item.CreatedAt = createdAt
+		item.UpdatedAt = updatedAt
+		items = append(items, item)
+	}
+
+	return items, nil
+}
